@@ -55,7 +55,7 @@ Esta aplicação web permite gravar a tela do usuário juntamente com o áudio d
 ## Observações
 
 - Certifique-se de permitir o acesso à tela e ao microfone quando solicitado pelo navegador.
-- As gravações são armazenadas no `localStorage` do navegador, portanto, serão perdidas se o cache do navegador for limpo.
+- As gravações são armazenadas no `IndexedDB` do navegador, portanto, serão mantidas mesmo após recarregar a página.
 
 ## Licença
 
