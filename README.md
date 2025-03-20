@@ -16,6 +16,7 @@ Gravador de Tela
 
 Esta aplicação web permite gravar a tela do usuário juntamente com o áudio do sistema e do microfone. As gravações podem ser salvas no `IndexedDB` do navegador, visualizadas e baixadas posteriormente.
 
+
 ## Funcionalidades
 
 - Iniciar e parar gravação da tela com áudio.
