@@ -9,40 +9,43 @@
  /$$  \ $$| $$      | $$      | $$_____/| $$_____/| $$  | $$| $$  \ $$| $$_____/| $$      
 |  $$$$$$/|  $$$$$$$| $$      |  $$$$$$$|  $$$$$$$| $$  | $$| $$  | $$|  $$$$$$$|  $$$$$$$
  \______/  \_______/|__/       \_______/ \_______/|__/  |__/|__/  |__/ \_______/ \_______/
-=======
-
-                                                      
-
-## Sobre o Projeto
-
+ ```
 Gravador de Tela
 
 ## Descrição
 
-Esta aplicação web permite gravar a tela do usuário juntamente com o áudio do sistema e do microfone. As gravações podem ser salvas no `localStorage` do navegador, visualizadas e baixadas posteriormente.
+Esta aplicação web permite gravar a tela do usuário juntamente com o áudio do sistema e do microfone. As gravações podem ser salvas no `IndexedDB` do navegador, visualizadas e baixadas posteriormente.
 
 ## Funcionalidades
 
 - Iniciar e parar gravação da tela com áudio.
-- Salvar gravações no `localStorage`.
+- Salvar gravações no `IndexedDB`.
 - Carregar e visualizar gravações salvas.
 - Baixar gravações salvas.
 - Excluir gravações salvas.
 - Exibir o tamanho total das gravações armazenadas.
+- Visualizar um gráfico de pizza com o espaço ocupado e livre.
 
 ## Tecnologias Utilizadas
 
-- HTML5
-- JavaScript
-- Bootstrap 5
+- **HTML5**
+- **JavaScript**
+- **Bootstrap 5**
+- **Chart.js**
+- **Font Awesome**
 
 ## Como Usar
 
 1. Abra o arquivo `screenrec.html` em um navegador compatível.
-2. Clique no botão "Iniciar Gravação" para começar a gravar a tela.
-3. Clique no botão "Parar Gravação" para finalizar a gravação.
-4. A gravação será salva automaticamente no `localStorage` e aparecerá na tabela de gravações salvas.
-5. Utilize os botões na tabela para visualizar, baixar ou excluir as gravações.
+2. Clique no botão **"Iniciar Gravação"** para começar a gravar a tela.
+3. Clique no botão **"Parar Gravação"** para finalizar a gravação.
+4. A gravação será salva automaticamente no `IndexedDB` e aparecerá na tabela de gravações salvas.
+5. Utilize os botões na tabela para:
+   - **Visualizar**: Abrir o modal com o vídeo.
+   - **Baixar**: Fazer o download do vídeo.
+   - **Excluir**: Remover a gravação.
+6. Clique no botão **"Visualizar Gráfico"** para abrir o modal com o gráfico de espaço.
+
 
 ## Estrutura do Projeto
 
