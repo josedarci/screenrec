@@ -88,6 +88,19 @@
                 </div>
                 <div class="modal-body">
                     <video id="videoPlayer" controls style="width: 100%; display: none;"></video>
+                    <div class="mt-3 text-center">
+                        <button id="playBtn" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                        <button id="pauseBtn" class="btn btn-secondary">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button id="rewindBtn" class="btn btn-warning">
+                            <i class="fas fa-undo"></i> Retroceder 10s
+                        </button>
+                        <button id="forwardBtn" class="btn btn-success">
+                            <i class="fas fa-forward"></i> Avançar 10s
+                        </button>
                 </div>
             </div>
         </div>
@@ -107,6 +120,32 @@
     const videoModal = new bootstrap.Modal(document.getElementById("videoModal"));
     const videoPlayer = document.getElementById("videoPlayer");
     const totalSizeDisplay = document.getElementById("totalSize");
+
+    // Referências aos botões de controle
+        const playBtn = document.getElementById("playBtn");
+        const pauseBtn = document.getElementById("pauseBtn");
+        const rewindBtn = document.getElementById("rewindBtn");
+        const forwardBtn = document.getElementById("forwardBtn");
+
+        // Evento para reproduzir o vídeo
+        playBtn.addEventListener("click", () => {
+            videoPlayer.play();
+        });
+
+        // Evento para pausar o vídeo
+        pauseBtn.addEventListener("click", () => {
+            videoPlayer.pause();
+        });
+
+        // Evento para retroceder 10 segundos
+        rewindBtn.addEventListener("click", () => {
+            videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
+        });
+
+        // Evento para avançar 10 segundos
+        forwardBtn.addEventListener("click", () => {
+            videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 10);
+        });
 
                 function renderStorageChartInModal() {
             const transaction = db.transaction("recordings", "readonly");
