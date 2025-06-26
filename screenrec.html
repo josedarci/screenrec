@@ -1,20 +1,27 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gravação de Tela com Persistência</title>
+    <title>Gravação de Tela com Persistência </title>
+
+    <!-- Bootstrap CSS & JS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Font‑Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+    <!-- ✅ WebM duration patcher -->
+    <script src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.6/fix-webm-duration.js"></script>
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+        body { font-family: Arial, sans-serif; }
     </style>
 </head>
 
@@ -22,14 +29,11 @@
 
     <h1 class="text-center">Gravação de Tela</h1>
 
-
     <!-- Botões de ação -->
     <div class="text-center mt-3">
+
         <button id="startBtn" class="btn btn-primary">
             <i class="fas fa-play"></i> Iniciar Gravação
-        </button>
-        <button id="stopBtn" class="btn btn-danger" disabled>
-            <i class="fas fa-stop"></i> Parar Gravação
         </button>
         <button id="loadBtn" class="btn btn-secondary">
             <i class="fas fa-folder-open"></i> Carregar Última Gravação
@@ -37,31 +41,42 @@
         <button id="openChartBtn" class="btn btn-info">
             <i class="fas fa-chart-pie"></i> Visualizar Gráfico
         </button>
+        <div class="form-check d-inline-block ms-3">
+            <input class="form-check-input" type="checkbox" id="noiseChk" checked>
+            <label class="form-check-label" for="noiseChk">
+                Redução de ruído
+            </label>
+        </div>
+
     </div>
+
     <!-- Exibir tamanho total dos vídeos -->
     <p class="text-center mt-2">
         <strong>Total armazenado:</strong> <span id="totalSize">0 MB</span>
     </p>
     <div class="progress" style="height: 25px;">
         <div id="spaceProgressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0"
-            aria-valuemin="0" aria-valuemax="100">
+             aria-valuemin="0" aria-valuemax="100">
             0%
         </div>
     </div>
-   <div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="chartModalLabel">Gráfico de Espaço de Armazenamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                <canvas id="modalStorageChart" width="400" height="400"></canvas>
+
+    <!-- Modal: gráfico -->
+    <div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chartModalLabel">Gráfico de Espaço de Armazenamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <canvas id="modalStorageChart" width="400" height="400"></canvas>
+                </div>
             </div>
         </div>
     </div>
-</div>
-    <!-- Tabela de gravações -->
+
+    <!-- Tabela -->
     <h2 class="mt-4">Gravações Salvas</h2>
     <table class="table table-striped table-bordered">
         <thead>
@@ -74,12 +89,10 @@
                 <th></th>
             </tr>
         </thead>
-        <tbody id="recordingsTableBody">
-            <!-- Linhas de gravação serão adicionadas aqui -->
-        </tbody>
+        <tbody id="recordingsTableBody"></tbody>
     </table>
 
-    <!-- Modal para visualizar gravação -->
+    <!-- Modal: vídeo -->
     <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -90,434 +103,275 @@
                 <div class="modal-body">
                     <video id="videoPlayer" controls style="width: 100%; display: none;"></video>
                     <div class="mt-3 text-center">
-                        <button id="playBtn" class="btn btn-primary">
-                            <i class="fas fa-play"></i> Play
-                        </button>
-                        <button id="pauseBtn" class="btn btn-secondary">
-                            <i class="fas fa-pause"></i> Pause
-                        </button>
-                        <button id="rewindBtn" class="btn btn-warning">
-                            <i class="fas fa-undo"></i> Retroceder 10s
-                        </button>
-                        <button id="forwardBtn" class="btn btn-success">
-                            <i class="fas fa-forward"></i> Avançar 10s
-                        </button>
+                        <button id="playBtn"   class="btn btn-primary"><i class="fas fa-play"></i> Play</button>
+                        <button id="pauseBtn"  class="btn btn-secondary"><i class="fas fa-pause"></i> Pause</button>
+                        <button id="rewindBtn" class="btn btn-warning"><i class="fas fa-undo"></i> Retroceder 10s</button>
+                        <button id="forwardBtn"class="btn btn-success"><i class="fas fa-forward"></i> Avançar 10s</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Core JS -->
     <script>
         let mediaRecorder;
+        let displayStream;
+        let micStream;
+        let isRecording = false;
+                    // initial UI will be set after DOM is ready
         let chunks = [];
         let db;
-        let startTime; // Declare startTime here, outside of startRecording
+        let startTime;
 
-        const startBtn = document.getElementById("startBtn");
-        const stopBtn = document.getElementById("stopBtn");
-        const loadBtn = document.getElementById("loadBtn");
+        const startBtn        = document.getElementById("startBtn");
+        const noiseChk        = document.getElementById("noiseChk");
+        // const stopBtn removed
+        const loadBtn         = document.getElementById("loadBtn");
         const recordingsTableBody = document.getElementById("recordingsTableBody");
-        const videoModal = new bootstrap.Modal(document.getElementById("videoModal"));
-        const videoPlayer = document.getElementById("videoPlayer");
-        const totalSizeDisplay = document.getElementById("totalSize");
+        const videoPlayer     = document.getElementById("videoPlayer");
+        const totalSizeDisplay= document.getElementById("totalSize");
 
-        // Referências aos botões de controle
-        const playBtn = document.getElementById("playBtn");
-        const pauseBtn = document.getElementById("pauseBtn");
-        const rewindBtn = document.getElementById("rewindBtn");
-        const forwardBtn = document.getElementById("forwardBtn");
+        // Controles de reprodução
+        document.getElementById("playBtn").onclick    = () => videoPlayer.play();
+        document.getElementById("pauseBtn").onclick   = () => videoPlayer.pause();
+        document.getElementById("rewindBtn").onclick  = () => videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
+        document.getElementById("forwardBtn").onclick = () => videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 10);
 
-        // Evento para reproduzir o vídeo
-        playBtn.addEventListener("click", () => {
-            videoPlayer.play();
-        });
-
-        // Evento para pausar o vídeo
-        pauseBtn.addEventListener("click", () => {
-            videoPlayer.pause();
-        });
-
-        // Evento para retroceder 10 segundos
-        rewindBtn.addEventListener("click", () => {
-            videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
-        });
-
-        // Evento para avançar 10 segundos
-        forwardBtn.addEventListener("click", () => {
-            videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 10);
-        });
-
-        function renderStorageChartInModal() {
-            const transaction = db.transaction("recordings", "readonly");
-            const store = transaction.objectStore("recordings");
-            const request = store.getAll();
-
-            request.onsuccess = (event) => {
-                const recordings = event.target.result;
-                let totalSize = 0;
-
-                recordings.forEach((recording) => {
-                    totalSize += recording.size;
-                });
-
-                // Limite estimado (ajuste conforme necessário)
-                const estimatedLimitMB = 50; // 50 MB
-                const usedMB = (totalSize / (1024 * 1024)).toFixed(2);
-                const freeMB = (estimatedLimitMB - usedMB).toFixed(2);
-
-                // Dados para o gráfico
-                const data = {
-                    labels: ["Espaço Ocupado", "Espaço Livre"],
-                    datasets: [
-                        {
-                            data: [usedMB, freeMB],
-                            backgroundColor: ["#FF6384", "#36A2EB"], // Cores para os segmentos
-                        },
-                    ],
-                };
-
-                // Configuração do gráfico
-                const config = {
-                    type: "pie",
-                    data: data,
-                };
-
-                // Renderizar o gráfico no modal
-                const ctx = document.getElementById("modalStorageChart").getContext("2d");
-                new Chart(ctx, config);
-            };
-
-            request.onerror = (event) => {
-                console.error("Erro ao calcular espaço usado:", event.target.error);
-            };
-        }
-
-        function loadLastRecording() {
-            const transaction = db.transaction("recordings", "readonly");
-            const store = transaction.objectStore("recordings");
-            const request = store.getAll();
-
-            request.onsuccess = (event) => {
-                const recordings = event.target.result;
-
-                if (recordings.length === 0) {
-                    alert("Nenhuma gravação encontrada!");
-                    return;
-                }
-
-                // Obter a última gravação (assumindo que o ID é incremental)
-                const lastRecording = recordings[recordings.length - 1];
-
-                // Recriar o Blob e a URL
-                const blob = new Blob([lastRecording.blob], { type: "video/mp4" });
-                const url = URL.createObjectURL(blob);
-
-                // Abrir o modal para exibir a gravação
-                openModal(url);
-            };
-
-            request.onerror = (event) => {
-                console.error("Erro ao carregar a última gravação:", event.target.error);
-            };
-        }
-
-        // Inicializar IndexedDB
+        /* ------------------ IndexedDB ------------------ */
         function initDB() {
             const request = indexedDB.open("ScreenRecDB", 1);
-
-            request.onupgradeneeded = (event) => {
-                db = event.target.result;
-                if (!db.objectStoreNames.contains("recordings")) {
-                    db.createObjectStore("recordings", { keyPath: "id", autoIncrement: true });
-                }
+            request.onupgradeneeded = (e) => {
+                db = e.target.result;
+                db.createObjectStore("recordings", { keyPath: "id", autoIncrement: true });
             };
-
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                loadRecordings();
-            };
-
-            request.onerror = (event) => {
-                console.error("Erro ao abrir IndexedDB:", event.target.error);
-            };
+            request.onsuccess = (e) => { db = e.target.result; loadRecordings(); };
+            request.onerror   = (e) => console.error("DB error:", e.target.error);
         }
 
-        // Salvar gravação no IndexedDB
-        function saveRecording(recording) {
-            const transaction = db.transaction("recordings", "readwrite");
-            const store = transaction.objectStore("recordings");
-
-            // Salvar o blob diretamente no IndexedDB
-            const recordingData = {
-                date: recording.date,
-                name: recording.name,
-                blob: recording.blob, // Salvar o blob
-                size: recording.size,
-                duration: recording.duration // Adicionado
-            };
-
-            store.add(recordingData);
-
-            transaction.oncomplete = () => {
-                alert("Gravação salva no IndexedDB!");
-                loadRecordings();
-            };
-
-            transaction.onerror = (event) => {
-                console.error("Erro ao salvar gravação:", event.target.error);
-            };
-        }
-        function formatDuration(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = Math.floor(seconds % 60);
-            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        function saveRecording(rec) {
+            const tx = db.transaction("recordings", "readwrite");
+            tx.objectStore("recordings").add(rec);
+            tx.oncomplete = () => loadRecordings();
+            tx.onerror = (e) => console.error("Save error:", e.target.error);
         }
 
-        // Função para calcular o espaço usado no IndexedDB e atualizar a barra de progresso
-        function calculateUsedSpace() {
-            const transaction = db.transaction("recordings", "readonly");
-            const store = transaction.objectStore("recordings");
-            const request = store.getAll();
-
-            request.onsuccess = (event) => {
-                const recordings = event.target.result;
-                let totalSize = 0;
-
-                recordings.forEach((recording) => {
-                    totalSize += recording.size;
-                });
-
-                // Limite estimado (ajuste conforme necessário)
-                const estimatedLimitMB = 50; // 50 MB
-                const usedMB = (totalSize / (1024 * 1024)).toFixed(2);
-                const remainingMB = (estimatedLimitMB - usedMB).toFixed(2);
-
-                // Atualizar texto de espaço usado
-                totalSizeDisplay.textContent = `${usedMB} MB usados`;
-
-                // Atualizar barra de progresso
-                const progressPercentage = Math.min((usedMB / estimatedLimitMB) * 100, 100).toFixed(2);
-                const progressBar = document.getElementById("spaceProgressBar");
-                progressBar.style.width = `${progressPercentage}%`;
-                progressBar.setAttribute("aria-valuenow", progressPercentage);
-                progressBar.textContent = `${progressPercentage}%`;
-
-                // Exibir alerta se o espaço estiver quase cheio
-                if (progressPercentage >= 90) {
-                    alert("Atenção: o espaço disponível está quase cheio!");
-                }
-            };
-
-            request.onerror = (event) => {
-                console.error("Erro ao calcular espaço usado:", event.target.error);
-            };
+        function deleteRecording(id) {
+            const tx = db.transaction("recordings", "readwrite");
+            tx.objectStore("recordings").delete(id);
+            tx.oncomplete = () => loadRecordings();
         }
 
-        // Função para calcular o espaço usado e renderizar o gráfico
-        function renderStorageChart() {
-            const transaction = db.transaction("recordings", "readonly");
-            const store = transaction.objectStore("recordings");
-            const request = store.getAll();
-
-            request.onsuccess = (event) => {
-                const recordings = event.target.result;
-                let totalSize = 0;
-
-                recordings.forEach((recording) => {
-                    totalSize += recording.size;
-                });
-
-                // Limite estimado (ajuste conforme necessário)
-                const estimatedLimitMB = 50; // 50 MB
-                const usedMB = (totalSize / (1024 * 1024)).toFixed(2);
-                const freeMB = (estimatedLimitMB - usedMB).toFixed(2);
-
-                // Dados para o gráfico
-                const data = {
-                    labels: ["Espaço Ocupado", "Espaço Livre"],
-                    datasets: [
-                        {
-                            data: [usedMB, freeMB],
-                            backgroundColor: ["#FF6384", "#36A2EB"], // Cores para os segmentos
-                        },
-                    ],
-                };
-
-                // Configuração do gráfico
-                const config = {
-                    type: "pie",
-                    data: data,
-                };
-
-                // Renderizar o gráfico
-                const ctx = document.getElementById("storageChart").getContext("2d");
-                new Chart(ctx, config);
-            };
-
-            request.onerror = (event) => {
-                console.error("Erro ao calcular espaço usado:", event.target.error);
-            };
-        }
-
-        // Chamar a função após carregar as gravações
-     function loadRecordings() {
-            const transaction = db.transaction("recordings", "readonly");
-            const store = transaction.objectStore("recordings");
-            const request = store.getAll();
-
-            request.onsuccess = (event) => {
-                const recordings = event.target.result;
+        function loadRecordings() {
+            const tx = db.transaction("recordings", "readonly");
+            tx.objectStore("recordings").getAll().onsuccess = (e) => {
                 recordingsTableBody.innerHTML = "";
-
-                recordings.forEach((recording) => {
-                    const blob = new Blob([recording.blob], { type: "video/mp4" });
-                    const url = URL.createObjectURL(blob);
-                    const formattedDuration = formatDuration(recording.duration);
-                    const row = document.createElement("tr");
+                const recs = e.target.result;
+                recs.forEach(r => {
+                    const blob = new Blob([r.blob], { type: "video/webm" });
+                    const url  = URL.createObjectURL(blob);
+                    const row  = document.createElement("tr");
                     row.innerHTML = `
-                <td>${recording.date}</td>
-                <td>${recording.name}</td>
-                <td>${formattedDuration}</td>
-                <td>
-                    <a href="${url}" download="${recording.name}" class="btn btn-success "><i class="fas fa-download"></i> Baixar</a>
-                </td>
-                <td>
-                    <button class="btn btn-info" onclick="openModal('${url}')"> <i class="fas fa-eye"></i> Visualizar</button>
-                </td>
-                <td>
-                    <button class="btn btn-danger" onclick="deleteRecording(${recording.id})"><i class="fas fa-trash"></i> Excluir</button>
-                </td>
-            `;
+                        <td>${r.date}</td>
+                        <td>${r.name}</td>
+                        <td>${formatDuration(r.duration)}</td>
+                        <td><a href="${url}" download="${r.name}" class="btn btn-success"><i class="fas fa-download"></i> Baixar</a></td>
+                        <td><button class="btn btn-info" onclick="openModal('${url}')"><i class="fas fa-eye"></i> Visualizar</button></td>
+                        <td><button class="btn btn-danger" onclick="deleteRecording(${r.id})"><i class="fas fa-trash"></i> Excluir</button></td>`;
                     recordingsTableBody.appendChild(row);
                 });
-
                 calculateUsedSpace();
-                renderStorageChart();
-            };
-
-            request.onerror = (event) => {
-                console.error("Erro ao carregar gravações:", event.target.error);
             };
         }
 
-
-
-        // Excluir gravação do IndexedDB
-        function deleteRecording(id) {
-            const transaction = db.transaction("recordings", "readwrite");
-            const store = transaction.objectStore("recordings");
-            store.delete(id);
-
-            transaction.oncomplete = () => {
-                loadRecordings();
-            };
-
-            transaction.onerror = (event) => {
-                console.error("Erro ao excluir gravação:", event.target.error);
-            };
-        }
-
-        // Abrir modal e exibir vídeo gravado
+        /* ------------------ UI helpers ------------------ */
         function openModal(url) {
-            // Configurar o vídeo no modal
             videoPlayer.src = url;
             videoPlayer.style.display = "block";
             videoPlayer.load();
-
-            // Abrir o modal usando o método do Bootstrap
-            const modalElement = document.getElementById("videoModal");
-            const modalInstance = new bootstrap.Modal(modalElement);
-            modalInstance.show();
-
-            // Garantir que o foco esteja no modal
-            modalElement.addEventListener("shown.bs.modal", () => {
-                videoPlayer.focus(); // Focar no vídeo ou em outro elemento dentro do modal
-            });
+            new bootstrap.Modal(document.getElementById("videoModal")).show();
         }
-        // Iniciar gravação com áudio
-        async function startRecording() {
+
+        function formatDuration(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2,"0");
+            const s = Math.floor(sec % 60).toString().padStart(2,"0");
+            return `${m}:${s}`;
+        }
+
+        function calculateUsedSpace() {
+            const tx = db.transaction("recordings","readonly");
+            tx.objectStore("recordings").getAll().onsuccess = (e) => {
+                const total = e.target.result.reduce((sum,r)=>sum + r.size,0);
+                const mb = (total / (1024*1024)).toFixed(2);
+                totalSizeDisplay.textContent = `${mb} MB usados`;
+                const pct = Math.min((mb/50)*100,100).toFixed(2);
+                const bar = document.getElementById("spaceProgressBar");
+                bar.style.width = pct+"%";
+                bar.setAttribute("aria-valuenow",pct);
+                bar.textContent = pct+"%";
+            }
+        }
+
+        /* ------------------ Recording ------------------ */
+        async function startRecording(customName) {
             try {
-                const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                displayStream = await navigator.mediaDevices.getDisplayMedia({
                     video: { cursor: "always" },
-                    audio: true
+                    // Tenta capturar áudio interno do sistema (Chrome/Edge 124+)
+                    audio: { systemAudio: "include" }
                 });
+                if(!displayStream.getAudioTracks().length){
+                    console.warn("⚠️ Nenhum áudio interno foi capturado. Verifique se marcou 'compartilhar áudio' e se o navegador/OS suportam systemAudio.");
+                }
 
-                const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                micStream     = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: noiseChk.checked,
+                        autoGainControl: true
+                    } 
+                });
+                
+// ========= Combine system (desktop) audio + microphone =========
+const audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
+const dest       = audioCtx.createMediaStreamDestination();
 
-                const combinedStream = new MediaStream([
-                    ...displayStream.getVideoTracks(),
-                    ...audioStream.getAudioTracks(),
-                ]);
+// desktop/system audio
+if(displayStream.getAudioTracks().length){
+    const sysSource = audioCtx.createMediaStreamSource(displayStream);
+    sysSource.connect(dest);
+}
 
-                mediaRecorder = new MediaRecorder(combinedStream);
+// microphone audio (opcional — pode comentar se não quiser mic)
+if(micStream && micStream.getAudioTracks().length){
+    const micSource = audioCtx.createMediaStreamSource(micStream);
+    if(noiseChk.checked){
+        // simples redução de ruído: corte grave + compressor leve
+        const hp = audioCtx.createBiquadFilter();
+        hp.type = "highpass";
+        hp.frequency.value = 120; // remove ruído de baixa frequência
+        const comp = audioCtx.createDynamicsCompressor();
+        comp.threshold.setValueAtTime(-50, audioCtx.currentTime);
+        comp.knee.setValueAtTime(40, audioCtx.currentTime);
+        comp.ratio.setValueAtTime(12, audioCtx.currentTime);
+        comp.attack.setValueAtTime(0, audioCtx.currentTime);
+        comp.release.setValueAtTime(0.25, audioCtx.currentTime);
+        micSource.connect(hp).connect(comp).connect(dest);
+    } else {
+        micSource.connect(dest);
+    }
+}
+
+// Juntar vídeo + áudio mixado
+const stream = new MediaStream([
+    ...displayStream.getVideoTracks(),
+    ...dest.stream.getAudioTracks()
+]);
+
+
+                // prefer VP9+Opus
+                const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus") ?
+                                 "video/webm;codecs=vp9,opus" : "video/webm";
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+
                 chunks = [];
-                startTime = Date.now(); // Initialize startTime here
+                startTime = Date.now();
 
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) chunks.push(event.data);
-                };
+                isRecording = true;
+                updateToggleUI(true);
 
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: "video/mp4" });
-                    const name = `gravacao_${new Date().toISOString().replace(/[:.]/g, "-")}.mp4`;
-                    const size = blob.size;
-                    const endTime = Date.now();
-                    const durationInSeconds = (endTime - startTime) / 1000;
+                mediaRecorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
 
-                    const recording = {
+                mediaRecorder.onstop = async () => {
+                    const rawBlob   = new Blob(chunks, { type: mimeType });
+                    const duration  = Date.now() - startTime; // ms
+
+                    // ✅ corrige metadata de duração
+                    let fixedBlob;
+                    try {
+                        fixedBlob = await ysFixWebmDuration(rawBlob, duration);
+                    } catch(err) {
+                        console.warn("Falha ao corrigir duração, usando blob original", err);
+                        fixedBlob = rawBlob;
+                    }
+
+                    const rec = {
                         date: new Date().toLocaleString(),
-                        name,
-                        blob, // Salvar o blob diretamente
-                        size,
-                        duration: durationInSeconds
+                        name: (customName && customName.trim() ? customName.trim() : `gravacao_${new Date().toISOString().replace(/[:.]/g,"-")}`).replace(/\s+/g,'_') + '.webm',
+                        blob: fixedBlob,
+                        size: fixedBlob.size,
+                        duration: duration/1000
                     };
+                    saveRecording(rec);
 
-                    saveRecording(recording);
-
-                    startBtn.disabled = false;
-                    stopBtn.disabled = true;
+                    // parar compartilhamento
+                    if(displayStream) displayStream.getTracks().forEach(t=>t.stop());
+                    if(micStream) micStream.getTracks().forEach(t=>t.stop());
+                    isRecording = false;
+                    updateToggleUI(false);
+                    // initial UI will be set after DOM is ready
+                    // initial UI will be set after DOM is ready
                 };
 
                 mediaRecorder.start();
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
+                updateToggleUI(true);
 
-            } catch (error) {
-                console.error("Erro ao iniciar gravação:", error);
+            } catch (err) {
+                console.error("Erro ao iniciar gravação:", err);
             }
         }
 
-        // Parar gravação
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== "inactive") {
-                mediaRecorder.stop();
-            }
-        }
+        function stopRecording() { if(mediaRecorder && mediaRecorder.state!=="inactive") mediaRecorder.stop(); }
 
-        // Evento para abrir o modal do gráfico
-        document.getElementById("openChartBtn").addEventListener("click", () => {
-            // Abrir o modal usando o Bootstrap
-            const chartModal = new bootstrap.Modal(document.getElementById("chartModal"));
-            chartModal.show();
+        /* buttons */
+        document.getElementById("openChartBtn").onclick = () => {
+            new bootstrap.Modal(document.getElementById("chartModal")).show();
+            // gráfico renderizado separadamente se quiser
+        };
+        
+        
+        loadBtn.onclick  = () => {
+            const tx = db.transaction("recordings","readonly");
+            tx.objectStore("recordings").getAll().onsuccess = e => {
+                const recs = e.target.result;
+                if(!recs.length) return alert("Nenhuma gravação encontrada!");
+                const last = recs[recs.length-1];
+                openModal(URL.createObjectURL(new Blob([last.blob],{type:"video/webm"})));
+            };
+        };
 
-            // Renderizar o gráfico no modal
-            renderStorageChartInModal();
-        });
+        
+function updateToggleUI(recording){
+    if(recording){
+        startBtn.innerHTML = '<i class="fas fa-stop"></i> Parar Gravação';
+        startBtn.classList.remove('btn-primary');
+        startBtn.classList.add('btn-danger');
+    } else {
+        startBtn.innerHTML = '<i class="fas fa-play"></i> Iniciar Gravação';
+        startBtn.classList.remove('btn-danger');
+        startBtn.classList.add('btn-primary');
+    }
+}
 
-        // Eventos dos botões
-        startBtn.addEventListener("click", startRecording);
-        stopBtn.addEventListener("click", stopRecording);
-        loadBtn.addEventListener("click", loadLastRecording);
+// Novo handler único
+startBtn.onclick = async () => {
+    if(isRecording){
+        stopRecording();
+    } else {
+        const filenameInput = prompt("Nome do arquivo (opcional):","");
+        await startRecording(filenameInput);
+    }
+};
 
-        // Inicializar IndexedDB ao carregar a página
-        window.onload = initDB;
+        window.onload = () => { initDB(); updateToggleUI(false); };
     </script>
+<<<<<<< josedarci-AudioInterno
+=======
 
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     </div>
+>>>>>>> main
 </body>
-
 </html>
